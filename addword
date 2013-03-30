@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ -n $1 -a -n $2 ]; then
+	echo "frword($2,$1)." >> bdd.pl
+else
+	echo "USAGE: ./addword <French Word> <SMS Word>"
+fi
