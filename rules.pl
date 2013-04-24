@@ -13,5 +13,5 @@ smsVersFr( [Tete|Queue], [Tres|Qres]) :-
 % Cette règle permet d'ajouter un mot au dictionnaire personnel.
 ajouterDicoPerso(MotSms, MotFr) :-
 	open('basemotperso.pl', append, File),
-		format(File, 'dicoperso(~a,\'~a\').~n', [MotSms,MotFr]),
+		format(File, 'dicoperso(\'~a\',\'~s\').~n', [MotSms,MotFr]),
 	close(File).
