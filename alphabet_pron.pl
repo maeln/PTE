@@ -129,3 +129,5 @@ pron3('tch','tʃ').
 pron3('sch','ʃ').
 
 % Petit problème d'ambiguiter avec 'ent' -> Peut s'entendre de plusieurs manière.
+pron3('ent', 'ɑ̃').
+pron3('ant', 'ɑ̃').

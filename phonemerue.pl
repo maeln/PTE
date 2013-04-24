@@ -3,19 +3,12 @@
 % 	- E : Lettre ou ensemble de lettre.
 %	- G : Equivalent en phonètique.
 
-% NOTE RAPPORT AU IA
-% Comme un cerveau, elle ne peut rien inventer sans d'abord connaitre.
-% On ne connais pas le français, on la appris.
-% Les différents dictionnaire du programme son nécessaire et représente
-% la "mémoire" de l'IA. Ce n'est pas tricher dans faire usage.
-% Une IA n'est qu'une base de connaisance et de relation qu'il serait
-% impossible de posséder pour un cerveau humain.
-% on peut toutefois lui faire apprendre grâce à ses connaisances.
-
 % Regexp pour le wikitionnary :
 % ((?<=(\x27{3}))\w+)|((?<=\x7C).+(?=\x7C))
 % ((?<=(\x27{3}))\w(?=\x27))|((?<=\x7C)[^\s]+(?=\x7C))
 % sed s/\'\'\'/phoneme\(\'/ test1 
+
+:- ensure_loaded(basepho), ensure_loaded(dicopron).
 
 pholettre([],[]).
 pholettre([T|Q],[H|R]) :-
@@ -30,3 +23,16 @@ getPhon([T1|R],[H|Q]) :- phon([T1],H), getPhon(R,Q).
 enPhonetique(Mot,Trad) :-
 	atom_codes(Mot,Liste),
 	getPhon(Liste,Trad).
+
+toString([],[]).
+toString([T|Q],[H|C]) :-
+	atom_codes(T,H),
+	toString(Q,C).
+	
+
+traduirePhoneme(Mot,Trad) :-
+	enPhonetique(Mot,Phon),
+	toString(Phon, String),
+	flatten(String, Liste),
+	name(Ss,Liste),
+	pron(Trad,Ss).
