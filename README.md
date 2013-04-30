@@ -4,9 +4,9 @@ Projet Technique De Première Année
 Traduction du langage SMS vers le Français.
 -----------------------
 
-# Maël Naccache, Francisco Ruivo, Benjamin Fraquet, Merouane Bousbaa
-# IUT de Nantes, Département Informatique, 1ère Année.
-# 2012 - 2013
+> Maël Naccache, Francisco Ruivo, Benjamin Fraquet, Merouane Bousbaa
+> IUT de Nantes, Département Informatique, 1ère Année.
+> 2012 - 2013
 
 Ce projet, réalisé dans le cadre des projets de première année pour l'IUT de Nantes,
 consistais à réaliser une intelligence artificiel, en Prolog, capable de produire une phrase
