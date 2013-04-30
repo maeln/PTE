@@ -19,7 +19,7 @@ Ensuite, utilisé la règle traduire/2 pour traduire votre phrase. Celle-ci prod
 
 # Exemple :
 
-	?- traduire('bjr komen va thon sha ?', E).
+	?- traduire('bjr komen tu va ?', E).
 	
 	E = [bonjour, comment, tu, va, ?] ;
 	E = [bonjour, comment, tu, vas, ?] .
