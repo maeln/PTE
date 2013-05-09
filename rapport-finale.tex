@@ -8,6 +8,8 @@
 \usepackage{tipa}
 \usepackage{tipx}
 
+\usepackage{listings}
+
 \title{\textbf{Rapport Finale De Projet Technologique}}
 \author{Benjamin Fraquet\\
 		Francisco Ruivo\\
@@ -69,7 +71,7 @@
 		Par exemple, {\em c.à.d} veut dire {\em C'est à dire}.\\
 		
 		\item \textbf{4 - Un mot est encadré par deux espaces}\\
-		Ces cette définition d'un mot que nous choisissons pour notre traduction. Elle vous aura sûrement choqué au plus profond de votre petit cœur sensible. En effet, {\em J'étais} est constitué de deux mots, ors, selon notre définition, {\em J'étais} n'est qu'un mot. Alors, pourquoi cette hérésie ? Si vous avez bien lu la section 1.2, vous avez peut être déjà une petite idée. Rappelez-vous, nous avons parler de l'agencement E.161 qui rendais difficile d'accès les caractères spéciaux dont l'apostrophe et tout autre ponctuations fait partie. Aussi, il est relativement sur d'assumé d'une phrase SMS ne contiendra n'y apostrophe, ni ponctuation autre que des points d'exclamation ou d'interrogation ( en vérité, il s'agit plus souvent de $ \forall n \in [5;+\infty] | n \times ? \vee n \times ! $ ). Cela nous permet de simplifier grandement la traduction sans risquer de détériorer sa qualité.\\
+		Ces cette définition d'un mot que nous choisissons pour notre traduction. Elle vous aura sûrement choqué au plus profond de votre petit cœur sensible. En effet, {\em J'étais} est constitué de deux mots, ors, selon notre définition, {\em J'étais} n'est qu'un mot. Alors, pourquoi cette hérésie ? Si vous avez bien lu la section 1.2, vous avez peut être déjà une petite idée. Rappelez-vous, nous avons parler de l'agencement E.161 qui rendais difficile d'accès les caractères spéciaux dont l'apostrophe et tout autre ponctuations fait partie. Aussi, il est relativement sur d'assumé d'une phrase SMS ne contiendra n'y apostrophe, ni ponctuation autre que des points d'exclamation ou d'interrogation ( en vérité, il s'agit plus souvent de $ \forall n \in [5;+\infty] | n \times ? \vee n \times ! $ ). Toutefois, nous allons tout de même traiter la ponctuation comme des mots, seul les apostrophes ne seront pas traité.\\
 		\item \textbf{5 - Une phrase en SMS est entièrement en minuscule}\\
 		Cette axiome est nécessaire du à un détail technique que nous expliquerons dans le Chapitre 3. Il peut ce justifier pour les mêmes raisons que l'axiome ci-dessus.\\
 	\end{itemize}
@@ -93,9 +95,236 @@
 	Cette méthode n'est bien sur pas non plus exempt de défaut, toutefois, nous aborderons ceci dans la section 4.3 dans laquelle nous aborderons aussi les solutions techniques et théoriques à tout les problèmes que nous avons pu rencontrer.
 
 \chapter{Partie Technique}
+Cette partie va ce concentrer sur l'implémentation des idées proposés dans le Chapitre 2. Il présentera aussi le diffèrent problème technique rencontré lors de la réalisation du projet.
+
 	\section{Un peu de dictionnaire dans mon Prolog}
+	Avant d'essayer d'implémenter un dictionnaire en Prolog, essayons de modéliser ce que représente un dictionnaire.\\
+	Nous pouvons voir un dictionnaire Français-SMS comme un ensemble de relation entre différents éléments ( ici, les mots ). Très simplement nous pouvons écrire ceci comme :\\
+	\smallskip
 	
-	\section{Une /\textipa{so.ly.sj\~O}/ différente}
+		$ 
+			Dictionnaire \in \{ \\
+			\indent	"bjr" \rightarrow "bonjour"\\
+			\indent "slt" \rightarrow "salut"\\
+			\indent \}
+		$\\
+	
+	\noindent Cette association d'élèment ce retrouve dans la plupart des langages sous la forme des tables de hachages. Toutefois, Prolog ne dispose pas de ce type de donnée, mais, du à la nature logique du langage, il est aisé de créer ce type de relation.\\
+	Nous avons donc choisi d'utiliser les \emph{Fait} pour implémenter ceci. Un dictionnaire peut s'exprimer sous la forme d'un fait d'arité 2 comprenant un mot SMS et sont équivalent Français. L'équivalent de l'écriture relationnel précédent s'écrit donc en Prolog :\\
+	
+	\begin{lstlisting}[language=Prolog]
+	dico('bjr','bonjour').
+	dico('slt','salut').
+	\end{lstlisting}
+	
+	Nous avons donc créer une première base de connaissance pour notre intelligence artificielle. Ainsi, nous pouvons déjà commencé à traduire grâce à l’interpréteur Prolog, par exemple, pour traduire {\em "bjr"} :
+	\begin{lstlisting}[language=Prolog]
+	?- dico('bjr',E).
+	E = 'bonjour'.
+	
+	true.
+	\end{lstlisting}
+	
+	Nous avons donc une première traduction par dictionnaire fonctionnel, toutefois celle-ci n'est pas très pratique à utiliser et ne traduit qu'un mot à la fois. Comment allons nous faire pour traduire des phrases ?\\
+	Pour cela nous allons utiliser une {\em Règles}. Sans faire un cours de Prolog ( ce qui n'est pas le but de ce rapport et qui est hors de mes compétences ), une règles est simplement un terme complexe composé d'autre règle et de fait que l’interpréteur Prolog va chercher à unifier.
+	\paragraph{}
+	Nous pouvons donc écrire une règle récursive qui va parcourir une liste de mot en SMS en séparant la tête de la liste et la queue de la liste, va appliquer le fait {\em dico/2} sur la tête, placer le résultat dans la tête de la liste en second argument puis passer les queues des deux listes à elle même pour ainsi traduire toute la liste jusqu'à la fin :
+	
+	\begin{lstlisting}[language=Prolog]
+	smsVersFr([],[]). % Cas final.
+	smsVersFr([Tete|Queue],[Tres|Qres]) :-
+		dico(Tete,Tres),  
+		smsVersFr(Queue,Qres).
+	\end{lstlisting}
+	
+	Cette règles nous permet donc de traduire une liste d'atomes ( Ici représentant des mots en SMS ) littéralement mot-à-mot. Par exemple :
+	
+	\begin{lstlisting}[language=Prolog]
+	?- smsVersFr(['slt','bjr'],E). 
+	E = [salut, bonjour].
+	
+	true.
+	\end{lstlisting}
+	
+	Nous pouvons encore améliorer ce système en créant une règle prenant une chaîne de caractère et renvoyant les traductions trouvé. Pour cela, il nous suffit de découper la chaîne en liste d'atomes. Il existe une règles de SWI-Prolog permettant ceci, il s'agit de {\em atomic\_list\_concat/3}. Cette règles à trois argument : Une liste d'atomes, une chaîne qui servira de séparateur et la chaîne à découper. Nous utilisons un espace comme séparateur. Ce choix est du à l'Axiome 4, ce qui simplifie le système mais a pour principal défaut de ne pas gérer la ponctuation, par exemple, si l'on cherche à découper la phrase {\em "bjr, slt"} nous obtiendrons les atomes {\em ['bjr,', 'slt']}. {\em 'bjr,'} sera donc consiéré comme un mot, hors, notre dictionnaire connais {\em "bjr"} mais pas {\em "bjr\textbf{,}"}, cela empêchera donc la traduction. Nous expliquerons plus tard comment nous avons résolu ce problème. Pour le moment nous devons faire avec.\\
+	La règles de découpage est donc simple à écrire :
+	
+	\begin{lstlisting}[language=Prolog]
+	chaineVersAtom(Chaine, ListeAtom) :-
+		atomic_list_concat(ListeAtom, ' ', Chaine).
+	\end{lstlisting}
+	
+	Par exemple :
+	
+	\begin{lstlisting}[language=Prolog]
+	?- chaineVersAtom('bjr slt', B).
+	B = [bjr, slt].
+	
+	true.
+	\end{lstlisting}
+	
+	Il nous suffit ensuite de créer une règles utilisant les règles précédentes pour traduire une chaine de caractère :
+	
+	\begin{lstlisting}[language=Prolog]
+	traduire(Sms, Fr) :-
+		chaineVersAtom(Sms, Liste),
+		smsVersFr(Liste, Fr).
+	\end{lstlisting}
+	
+	Ce qui nous donnera :
+	
+	\begin{lstlisting}[language=Prolog]
+	?- traduire('bjr slt',E).
+	E = ['bonjour', 'salut'].
+	
+	true.
+	\end{lstlisting}
+	
+	Nous avons donc une traduction par dictionnaire fonctionnelle et simple d'utilisation. Une seul chose reste à régler : Que ce passe t'il si nous donnons à notre intelligence artificielle un mot qui n'est pas dans ça base de connaisance ?
+	
+	\begin{lstlisting}[language=Prolog]
+	?- traduire('bjr lol',E).
+	false.
+	\end{lstlisting}
+	
+	{\em "lol"} n'étant pas dans ça base de connaissance, il ne peut unifier {\em dico('lol',X).} et répond donc que la requête est fausse.\\
+	Nous pouvons forcer l'intelligence artificielle à traduire quand bien même elle ne connais pas le mot simplement en utilisant le fait {\em dico(X,X).}. Ce fait associera tout mot à lui même. Il doit être déclaré après toute les autres occurrences de dictionnaire ( autrement tout mot sera remplacer par ... lui même, ce qui n'est pas très intéressant ). En ajoutant ce fait on obtient donc :
+	
+	\begin{lstlisting}[language=Prolog]
+	?- traduire('bjr lol',E).
+	E = ['bonjour','lol'].
+	
+	true.
+	\end{lstlisting}
+	
+	Ce comportement n'est pas forcément désirable puisque la traduction est de ce fait faussé mais cela permet à l'IA de fonctionner malgré tout.
+	La traduction par dictionnaire est donc utilisable, la plus grande difficulté ici étant de créer une base de fait suffisamment grande pour traduire le plus de termes possibles.\\
+	Toutefois, nous avons encore le problème d'être incapable de traduire les mots inconnus, pour cela nous avons développer une deuxième traduction.
+	
+	\section{Une /so.ly.sj\textipa{\~O}/ différente}
+	Quel est le point commun{\em Comment}, {\em Komen} et {\em coman} ?\\
+	Il ce prononce de la même manière ! En effet, les 3 ce traduise /\textipa{kOm\~a}/ en phonétique. Si nous arrivions à traduire les mot en SMS en phonétique, nous pourrions les comparés à une base connu de mot et ainsi trouver les traductions possibles du mot.\\
+	Nous allons tout d'abord nous intéresser à la traduction d'un mot en SMS. Pour cela nous nous basons sur le système API Français pour avoir la liste des phonèmes\footnote{Source : https://en.wikipedia.org/wiki/Help:IPA\_for\_French}. Il nous faut donc créer une base de connaissance contenant ces phonèmes. Pour cela nous avons utilisé un script Ruby pour parser la syntaxe de la page wikipedia, les fichiers ruby et les regexp utilisé sont disponible dans la le dossier v2.0/ à la racine du projet.
+	Nous avons donc créer un ensemble de fait dont voici certain exemple :\\
+	
+	\indent phon([99,104],'\textipa{k}').\\
+	\indent phon([114],'\textipa{K}').\\
+	\indent phon([114,104],'\textipa{K}').\\
+	\indent phon([99,104],'\textipa{\:l}').\\
+	\indent phon([115,99,104],'\textipa{\:l}').\\
+	
+	Vous vous demandez peut être ce que représente la liste en premier argument. En vérité, j'ai légèrement ( mais vraiment légèrement, et puis c'était pour votre bien d'abord ) menti qu'en je vous est présenté {\em 'slt bjr'.} comme étant une chaine. En vérité, en Prolog, toute chaîne écrite en entre apostrophe est un atome. Une chaîne est en réalité une liste de nombre représentant le caractère en UTF-8 \& ASCII 7bits en base 10. Ici, puisque nous allons traiter les mots caractère par caractère il est important de traiter des vrais "Chaîne", auquel cas nous traiterions atomes par atomes, ce que nous ne souhaitons pas. Donc, cette base de connaissance pourrait ce lire :\\
+	
+	\indent phon('ch','\textipa{k}').\\
+	\indent phon('r','\textipa{K}').\\
+	\indent phon('rh','\textipa{K}').\\
+	\indent phon('ch','\textipa{\:l}').\\
+	\indent phon('sch','\textipa{\:l}').\\
+	
+	Bien, maintenant, comment convertir un mot en sont équivalent phonétique ? Tout d'abord il faut le convertir en chaîne. Cela ce fait via la règle name/2 de Prolog :
+	
+	\begin{lstlisting}[language=Prolog]
+	?- name('Bonjour !',E). 
+	E = [66, 111, 110, 106, 111, 117, 114, 32, 33].
+	
+	true.
+	\end{lstlisting}
+	
+	Une fois ceci fait, il faut simplement convertir les caractères en phonèmes grâce au fait {\em phon/2} toutefois nous avons en problème. En effet, tout les phonèmes ne sont pas composé d'un même nombre de caractère, par exemple nous avons vu d'en notre base de connaisance que {\em r = \textipa{K}} ( 1 lettre = 1 phonème ) mais aussi que {\em rh = \textipa{K}} ( 2 lettres = 1 phonème ). Comment faire pour gérer cela ?\\
+	Et bien cela est simple puisque les listes en Prolog sont {\em Magique}. Vous vous rappelez peut être de la notation {\em [T|Q]} que nous avons utilisé dans la traduction par dictionnaire pour obtenir la tête et la queue d'une liste ? Et bien il est tout a fait possible d'écrire {\em [T1,T2,...,Tn|Q]} pour récupérer n élément en tête de liste.\\
+	Sachant que un phonème en français n'est pas composer de plus de 3 lettres, nous avons juste à dériver la règle de traduction en 3 variantes : une prenant 1 lettres, une en prenant 2 et une dernière en prenant 3.\\ 
+	La règle est très similaire à la règle smsVersFr/2 vu dans la traduction par dictionnaire. Elle prend 2 listes en arguments, applique un fait sur la ou les têtes de la 1\up{ère} liste, la place dans la tête de la 2\up{ème} liste puis s'applique récursivement sur les queues des listes :
+	
+	\begin{lstlisting}[language=Prolog]
+	getPhon([],[]).
+	getPhon([T1,T2,T3|R],[H|Q]) :- phon([T1,T2,T3],H), getPhon(R,Q).
+	getPhon([T1,T2|R],[H|Q]) :- phon([T1,T2], H), getPhon(R,Q).
+	getPhon([T1|R],[H|Q]) :- phon([T1],H), getPhon(R,Q).
+	\end{lstlisting}
+	
+	Ainsi, si nous essayons de traduire {\em Chat} en phonétique nous écrivons :
+	\begin{lstlisting}[language=Prolog]
+	?- name('chat',X), getPhon(X,B).
+	\end{lstlisting}
+	\indent \indent \indent \indent X = [99, 104, 97, 116],\\
+	\indent \indent \indent B = [\textipa{\:l}, a, s] ;\\
+	\indent \indent \indent X = [99, 104, 97, 116],\\
+	\indent \indent \indent B = [\textipa{\:l}, a, t] ;\\
+	\indent \indent \indent X = [99, 104, 97, 116],\\
+	\indent \indent \indent B = [\textipa{\:l}, \textipa{A}, t].\\
+	\begin{lstlisting}[language=Prolog]
+	true.
+	\end{lstlisting}
+	
+	Prolog va générer toute les traductions possibles grâce à ça base de connaissance. Nous pouvons noter qu'elle ne sont pas toute entièrement fidèle au mot toutefois, nous avons fait le choix de garder cette approximation car nous cherchons à traduire en phonétique du SMS, qui lui n'est pas forcément fidèle au mot d'origine non plus.\\
+	Cette marge d'approximation permet ainsi d'augmenter les traductions possibles et donc la probabilités de générer une traduction que l'utilisateur jugera correcte.
+	\paragraph{}
+	Pour simplifier l'utilisation de cette règles on va créer une autre règle :\\
+	enPhonetique/2 traduit un atome en phonétique :
+	\begin{lstlisting}[language=Prolog]
+	enPhonetique(Mot,Trad) :-
+		atom_codes(Mot,Liste),
+		getPhon(Liste,Trad).
+	\end{lstlisting}
+	
+	Notons ici que {\em atom\_codes/2} est similaire à {\em name/2}. On obtient donc :
+	\begin{lstlisting}[language=Prolog]
+	?- enPhonetique('sha', B).
+	\end{lstlisting}
+	\indent \indent \indent \indent  B = [\textipa{\:l}, a] .
+	\begin{lstlisting}[language=Prolog]
+	true.
+	\end{lstlisting}
+	
+	Bien, maintenant que nous pouvons traduire un mot SMS en phonétique, il serait pratique de s'en servir pour la traduction. Pour cela nous avons 2 choix : Utiliser une base de mot français et comparer les traductions phonétiques entre le mot SMS et la base, ou, utiliser une base de connaissance comprenant une base de mot en français et leurs phonétiques.\\
+	Nous avons décider de prendre la deuxième solution. Ce choix c'est fait pour plusieurs raison :\\
+	Tout d'abord, la première solution supposais d'essayer d'unifier chaque traduction phonétique possible de chaque mot français à chaque traduction phonétique possible du mot SMS ce qui aurais créer un nombre tellement important de combinaison qu'il aurait fallu Sequoia\footnote{https://fr.wikipedia.org/wiki/Sequoia\_\%28supercalculateur\%29} pour avoir une chance d'obtenir un jour des résultats.\\
+	Ensuite, nous avons évoqué le fait que la traduction phonétique était approximative, de ce fait, la 1\up{ère} solution aurait créer de nombreux faux résultat conséquence d'approximation faite pour le mot SMS et Français.
+	\paragraph{}
+	La deuxième solution nécessite toutefois de trouver un dictionnaire Français-Phonétique. Pour cela, nous avons parsé un dump du wiktionary\footnote{wiktionary.org} mis à notre disposition par Mr. Hernandez ( notre professeur encadrant ).
+	Nous avons pu ainsi générer une base de fait dont voici quelque exemple :\\
+	
+	\indent pron('lire','li\textipa{R}').\\
+	\indent pron('nouveau','nuvo').\\
+	\indent pron('mai','m\textipa{E}').\\
+	
+	Ensuite, nous avons créer une règle transformant une liste d'atome en chaîne :
+	\begin{lstlisting}[language=Prolog]
+	toString([],[]).
+		toString([T|Q],[H|C]) :-
+		atom_codes(T,H),
+		toString(Q,C).
+	\end{lstlisting}
+	
+	{\em atom\_codes/2 est similaire à name/2}\\
+	
+	Puis nous avons créé une règle qui traduit un mot SMS vers du Français grâce à la phonétique :
+	\begin{lstlisting}[language=Prolog]
+	traduirePhoneme(Mot,Trad) :-
+		enPhonetique(Mot,Phon),
+		toString(Phon, String),
+		flatten(String, Liste),
+		name(Ss,Liste),
+		pron(Trad,Ss).
+	\end{lstlisting}
+	
+	{\em flatten/2 sert à simplifier une liste composer. Par exemple [[42,13],25,65,[25]] devient [42,13,25,65,25].}\\
+	
+	Par exemple :
+	\begin{lstlisting}[language=Prolog]
+	?- traduirePhoneme('sha', B).
+		B = chat ;
+		B = chas ;
+		B = chas ;
+		B = chah ;
+		B = schah ;
+		B = 'Chat' ;
+		B = 'Chat' .
+		
+	true.
+	\end{lstlisting}
+	
+	Voila, nous avons une traduction phonétique fonctionnelle. Elle n'est pas parfaite, loin de la, aussi nous allons voir comment tirer profit du meilleur des deux traduction dans la prochaine partie.
 	
 	\section{But, will it blend ?}
 
