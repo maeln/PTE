@@ -1,0 +1,111 @@
+\documentclass[11pt]{book}
+
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+
+\usepackage[T1]{fontenc}
+
+\usepackage{tipa}
+\usepackage{tipx}
+
+\title{\textbf{Rapport Finale De Projet Technologique}}
+\author{Benjamin Fraquet\\
+		Francisco Ruivo\\
+		Maël Naccache\\
+		Merouane Bousbaa}
+\date{}
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\chapter{Introduction}
+	\section{Avant-Propos}
+	Le sujet de notre projet technologique était la "Traduction de langage sms/chat/forum en francais". La seul contraintes était de réaliser le projet en Prolog via l'implémentation libre SWI-Prolog. Si vous vous posez la question de ce qu'est le langage SMS ou ce qu'est Prolog, téléporter vos yeux respectivement vers les sections 1.2 et 1.3. Ce qu'il faut brièvement comprendre c'est qu'il nous étais demandé de traduire un ensemble d'abréviation française vers une phrase compréhensible pour le commun des mortels. Nous devions donc créer une petite intelligence artificiel capable de faire ceci pour nous. Pour cela, plusieurs idée nous sont venu à l'esprit, elle seront aborder dans la section 1.4.
+	\paragraph{} Sur ses mots, je vais vous laissez à l'immense joie de consulter le reste de ce rapport afin de découvrir le magnifique univers de la traduction, vu par des premières années. Une expérience qui je n'en doute point, ne manquera pas de vous surprendre ( en bien ou en mal, je ne garanti rien ).
+	
+	\section{Du langage SMS}
+	Vous l'avez déjà sûrement rencontré, que ce soit par vos enfant, vos neveux, voire peut être même, vos étudiants, il y à peut de chance que vous y ayez échappé. Prenant la forme de message court et rarement compréhensible pour le non-initié, le langage SMS à pour origine, comme son nom l'indique, le SMS.
+	\paragraph{}
+	SMS est l'abréviation de {\em Short Message Service}\footnote{Source: wikipedia.org/wiki/Short\_Message\_Service} ( Comme l'on dirais en Anglais de spécialité ). Il fait partie de la norme GSM et fut développé dans les années 1980, toutefois, son ouverture au grand publique date des années 2000. Historiquement, pour des raisons techniques, la taille d'un SMS à du être limité à 128 octets, c'est à dire, environ 146 caractère ASCII 7bits. Il faut de plus noter que les forfaits proposant des SMS illimités par les opérateurs grands publique est relativement récente ( on commence à en voir apparaître en 2004 mais ceux-ci sont souvent limité au réseau de l'opérateur et coûteux\footnote{Exemple du premier forfait "Illimité" de Bouygue Telecom : lesmobiles.com/actualite/1453-bouygues-lance-le-premier-forfait-sms-illimite.html} ). Aussi, l'utilisation d'abréviation dans les SMS s'est démocratisé afin de pouvoir transmettre un maximum d'information à un minimum de coût.\\
+	De plus, un autre facteur c'est rajouté à ceci : l'agencement E.161 utilisé dans la plupart des téléphones portables. En effet, il était relativement difficile d'embarqué un clavier classique à 102 touches tout en restant portable. Toutefois, cette agencement a plusieurs défaut : Il rend l'écriture plus longue, rend difficile d'accès les caractères accentués et spéciaux ( tel que l'apostrophe ) ainsi que les majuscules. Cela à pour conséquence une utilisation à outrance des abréviations, la suppressions des accents et tout autre caractères spéciaux ( qui de plus était bien souvent codé sur 1 octets ou plus au lieux de 7 bits, ce qui limitais d'autant plus la taille du SMS ) et utilisation de toute autre méthode pouvant réduire le temps de frappe et la taille du message.\\
+	Le langage SMS était née.\\
+	Malgré l'invention d'aide à la frappe ( tel que le T9\footnote{wikipedia.org/wiki/Text\_on\_9\_keys\#T9} ) et la généralisation des forfaits dit "illimités", le langage SMS continue toujours à être utilisé, notamment sur internet, puisqu'il permet de communiquer un message écrit en un minimum de temps et d'effort, au détriment de la qualité du dit message et du respect du récepteur qui aura bien souvent du mal à déchiffrer le message.\\
+	Voici un exemple\footnote{Merci à Mr. Batiste Martin du Groupe 4 qui m'aura fournit cet exemple.} : \\
+	\indent {\em slt comen sa va t ou y fo kon se voa}\\
+	Que l'on traduirait :\\
+	\indent {\em Salut. Comment ça va ? Tu est ou ? Il faut que l'on ce voit.}\\\\
+	Vous serez vous même juge de la compréhensibilité de ce message.\\
+	Nous allons désormais voir un autre langage, plus vieux que le SMS et surtout, plus formel.
+	
+	\section{De Prolog}
+	Prolog, pour PROgrammation LOGique, fut conçu en 1972 par Alain Colmerauer et Philippe Roussel à l'Université d'Aix-Marseille. Bien que l'on trouve des langages utilisant principalement la logique plus ancien que Prolog ( Absys ou Planner en 1969 ), Prolog est le premier langage à réellement utilisé le paradigme de programmation logique.\\
+	Prolog est un langage interprété, toutefois, il fonctionne différemment de ce que l'on voit chez Python, PHP, et autre langage interprété. En effet, en Prolog, l'interpréteur n'est pas la pour exécuter un programme, il est la pour apprendre et pour répondre à des questions. En effet, lorsque l'on code en Prolog on va en vérité créer des faits et des règles qui seront vrais si elle peuvent s'unifier et fausse sinon et on va les apprendre à notre interpréteur, on lui posera ensuite des questions et l'interpréteur nous répondra si elle sont vrais ou fausse en fonction de ce qu'on lui à appris. Il peut même, grâce au mécanisme d'unification, chercher pour une question, toute les réponses vrais.\\
+	Il est compliquer de comprendre comment on peut programmer ainsi, toutefois, tout serra expliquer dans le Chapitre 3 et la section 4.1.
+	
+	\section{Avant de programmer, des idées !}
+	Si vous ne le saviez déjà pas, vous devriez avoir désormais une vague idée de ce qu'est le langage SMS et le Prolog. Bien. Mais revenons au cœur du sujet : Comment allons nous traduire du SMS vers un français plus ou moins correcte ?
+	\paragraph{}
+	Deux grandes idées nous sont venu en tête. La première est relativement simple, il suffit de créer un dictionnaire de correspondance à la manière d'un dictionnaire français-anglais, par exemple. Il nous suffirais d'apprendre à notre petite intelligence artificielle la signification de chaque acronyme SMS pour qu'elle puisse traduire une phrase mot-à-mot.\\
+	La seconde idée est de ce basé sur la phonétique des mots. En effet, en SMS certain mot change de forme mais pas de prononciation par exemple {\em Comment} peut s'écrire {\em komen} mais s'entendra toujours /\textipa{k\!Om\~a}/, on peut ainsi "deviner" la signification de certain mot.
+	\paragraph{}
+	Nous allons étudier ces idées plus en détails dans le chapitre qui suis.
+
+\chapter{Partie Théorique}
+	\section{Posons quelques Axiomes}
+	Avant d'expliquer notre démarche il nous faut poser quelque axiomes que nous utiliserons dans notre traduction et expliquer pourquoi nous avons fait ces choix d'axiomes.\\
+	Les voici : \\
+	\begin{itemize}
+		\item \textbf{1 - Le SMS ne change pas l'ordre des mots et de la ponctuation dans la phrase.}\\
+		Le langage SMS n'est qu'un ensemble d'abréviation, aussi, il n'est pas sensé pouvoir changer la position d'un mot dans une phrase. Nous somme d'accord que {\em J'aime les patates.} et {\em J'patates. les aime} non pas la même signification, aussi {\em jm lé patat} et {\em jpatat lé m} sont tout autant différent.\\
+		
+		\item \textbf{2 - La traduction peut être ambigu}\\
+		La traduction n'est pas une fonction, par la nous voulons dire qu'une même abréviation peut être traduite en plusieurs mot différent. Un exemple simple sont les conjugaison : {\em komenc} pourrait ce traduire {\em commencer}, {\em commencé} ou encore {\em commencez}.\\
+		
+		\item \textbf{3 - Un mot en SMS peut être traduit par un groupe de mot}\\
+		Par exemple, {\em c.à.d} veut dire {\em C'est à dire}.\\
+		
+		\item \textbf{4 - Un mot est encadré par deux espaces}\\
+		Ces cette définition d'un mot que nous choisissons pour notre traduction. Elle vous aura sûrement choqué au plus profond de votre petit cœur sensible. En effet, {\em J'étais} est constitué de deux mots, ors, selon notre définition, {\em J'étais} n'est qu'un mot. Alors, pourquoi cette hérésie ? Si vous avez bien lu la section 1.2, vous avez peut être déjà une petite idée. Rappelez-vous, nous avons parler de l'agencement E.161 qui rendais difficile d'accès les caractères spéciaux dont l'apostrophe et tout autre ponctuations fait partie. Aussi, il est relativement sur d'assumé d'une phrase SMS ne contiendra n'y apostrophe, ni ponctuation autre que des points d'exclamation ou d'interrogation ( en vérité, il s'agit plus souvent de $ \forall n \in [5;+\infty] | n \times ? \vee n \times ! $ ). Cela nous permet de simplifier grandement la traduction sans risquer de détériorer sa qualité.\\
+		\item \textbf{5 - Une phrase en SMS est entièrement en minuscule}\\
+		Cette axiome est nécessaire du à un détail technique que nous expliquerons dans le Chapitre 3. Il peut ce justifier pour les mêmes raisons que l'axiome ci-dessus.\\
+	\end{itemize}
+	
+	Nous voila désormais armé pour entamer nos traduction !
+	
+	\section{Larousse mon amour}
+	Nous allons donc mettre en œuvre une traduction par dictionnaire. L'avantage de ce type de traduction est ça simplicité de mise en œuvre, sa rapidité et, dans le cas de langage que l'on peut traduire littéralement Mot-à-Mot comme le SMS, sa traduction quasi-parfaite si il n'y à pas d'ambiguïté. Pour cela, il nos faut juste créer une "base de connaissance" ( on peut voir ça comme une base de donnée relationnel ) m'étant en relation pour chaque abréviation SMS, le ou les mots français lui correspondant. Une fois que notre intelligence artificielle à pris connaissance de cette base, il lui suffit de "découper" une phrase mot à mot, selon l'axiome 4, et de traduire chacun d'entre eux grâce à sa base de connaissance.
+	\paragraph{}
+	Cette méthode à toutefois de gros défaut : Elle ne peut traduire un mot si il n'est pas dans ça base de connaissance, ne peut déterminer la traduction la plus probable dans le cas d'ambiguïté et nécessite de créer une énorme base de connaissance qui va devoir régulièrement changer. De plus, elle est incapable de s'adapter à des mots polymorphes en dehors de connaître leurs très nombreuses itération.\\
+	En bref, on ne peut ce contenter de cette méthode et il nous faut trouver un autre moyen de traduction.
+	
+	\section{Super-phonétique à la rescousse !}
+	Nous l'avons déjà aborder dans la section 1.4, nous pouvons utilisé la phonétique des mots pour les traduire.
+	La mise en œuvre de cette méthode est légèrement plus compliquer : Elle nécessite de connaître tout les phonèmes de la langue française et de savoir découper un mot en tout ses phonèmes. Toutefois, une fois cette étapes faite, le reste s'avère relativement simple : Une fois le mot SMS traduit en son équivalent phonétique on va rechercher si on peut l'unifier avec un mot français lui même traduit en phonétique, si oui, alors il s'agit très probablement de ça traduction.
+	\paragraph{} Noté comment j'ai précisé "probablement" dans la phrase précédente ? Et bien oui, la méthode par la phonétique n'est malheureusement pas parfaite. Si elle à l'avantage de traduire sans problèmes les mots polymorphes ( pour elle {\em komen}, {\em comen}, {\em coman}, etc ... sont pareilles ), il n'est pas garanti qu'elle fournisse une bonne traduction ( un mot en SMS peut avoir la même phonétique qu'un mot français sans être ce mot ) et, de plus, un simple modification d'en la phonétique entre l'abréviation et sa traduction réel, bien que négligeable par l'oreille humaine ( par exemple /\textipa{\~a}/ et /\textipa{\~O}/ sont relativement similaire ) fera rater la traduction par cette méthode.\\
+	Nous avons donc opter pour une solution prenants en compte les avantages et défaut de chaque méthode.
+	
+	\section{Passons le tout au mixeur}
+	Nous avons donc décidé d'utiliser des deux méthodes dans un ordres bien définie. Tout d'abords, on essaye de traduire la phrase via l'approche par dictionnaire et ensuite on utilise l'approche phonétique pour tout les mots que nous n'avons pu traduire précédemment. Faire ainsi à l'avantage de permettre de garder une base de connaissance relativement réduite, mais sure, pour l'approche par dictionnaire, permettant donc une traduction relativement fidèle, et de garder les mots variants pour l'approche par phonétique qui est plus adapté.\\
+	Cette méthode n'est bien sur pas non plus exempt de défaut, toutefois, nous aborderons ceci dans la section 4.3 dans laquelle nous aborderons aussi les solutions techniques et théoriques à tout les problèmes que nous avons pu rencontrer.
+
+\chapter{Partie Technique}
+	\section{Un peu de dictionnaire dans mon Prolog}
+	
+	\section{Une /\textipa{so.ly.sj\~O}/ différente}
+	
+	\section{But, will it blend ?}
+
+\chapter{Conclusion}
+	\section{A vous de jouer}
+	
+	\section{Les insectes attaques !}
+	
+	\section{Voyons plus grand ! Voyons plus loin !}
+	
+	\section{Credit ( Non ce n'est pas de l'argent )}
+
+\end{document}

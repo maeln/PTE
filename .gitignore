@@ -4,6 +4,8 @@
 
 *.ics
 
+*.swp
+
 Avorted/
 wumpus/
 

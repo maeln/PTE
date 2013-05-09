@@ -11,13 +11,35 @@
 % Nous choisissons de les découper à chaque espace du à l'Axiome n°1.
 % Il nous reste à réaliser la suppressions des ponctiations.
 chaineVersAtom(Chaine, ListeAtom) :-
-	atomic_list_concat(ListeAtom, ' ', Chaine).
+	traiterPonctuation(Chaine, ChainePonc),
+	atomic_list_concat(Atoms, ' ', ChainePonc),
+	lowcase(Atoms, ListeAtom).
+
+% Cette règles transforme tout caractère majuscule en minuscule.
+lowcase([],[]).
+lowcase([T1|R],[H|Q]) :- downcase_atom(T1,H), lowcase(R,Q).
+
+% S'occupe de traiter la ponctuation.
+ponc(44, [32,44,32]).
+ponc(46, [32,46,32]).
+ponc(63, [32,63,32]).
+ponc(33, [32,33,32]).
+ponc(58, [32,58,32]).
+ponc(59, [32,59,32]).
+ponc(E,E).
+
+cleanup([],[]).
+cleanup([T|R], [H|Q]) :- ponc(T,H), cleanup(R,Q).
+
+traiterPonctuation(Chaine, ChaineTraiter) :-
+	name(Chaine, Liste), cleanup(Liste, ListeTraiter),
+	flatten(ListeTraiter, Final), name(ChaineTraiter, Final).
 	
 % smsVersFR applique les correspondances présentes dans les dictionnaires de manière recursive, mot-à-mot.
 % smsVersFR/2
 % smsVersFR(X,Y). X = <LISTE MOT SMS>, Y = <LISTE MOT FRANÇAIS>
 smsVersFr([],[]).
-smsVersFr( [Tete|Queue], [Tres|Qres]) :-
+smsVersFr([Tete|Queue],[Tres|Qres]) :-
 	dico(Tete,Tres), smsVersFr(Queue,Qres).
 
 % Renvoi les diffèrentes formes phonètiques possible d'un mot.
@@ -65,3 +87,14 @@ traduire(Sms, Fr) :-
 	chaineVersAtom(Sms, Trad),
 	traduireMotaMot(Trad, Fr).
 	
+% Écrit une liste d'atome sous la forme d'une chaine propre sur la console.
+display([]).
+display([T|Q]) :- write(T), write(' '), display(Q).
+	
+
+% Traduction de manière "user-frienly".
+% Ne renvoie que la première traduction possible.
+% Donc, c'est nul.
+reduireFosse :-
+	write('Veuillez écrire la chaine à traduire :'),nl,
+	read(X), traduire(X,Fr), display(Fr).
