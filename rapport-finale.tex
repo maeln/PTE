@@ -16,6 +16,7 @@
 		Maël Naccache\\
 		Merouane Bousbaa}
 \date{}
+\usepackage{graphicx}
 \begin{document}
 
 \maketitle
@@ -213,7 +214,7 @@ Cette partie va ce concentrer sur l'implémentation des idées proposés dans le
 	\indent phon([99,104],'\textipa{\:l}').\\
 	\indent phon([115,99,104],'\textipa{\:l}').\\
 	
-	Vous vous demandez peut être ce que représente la liste en premier argument. En vérité, j'ai légèrement ( mais vraiment légèrement, et puis c'était pour votre bien d'abord ) menti qu'en je vous est présenté {\em 'slt bjr'.} comme étant une chaine. En vérité, en Prolog, toute chaîne écrite en entre apostrophe est un atome. Une chaîne est en réalité une liste de nombre représentant le caractère en UTF-8 \& ASCII 7bits en base 10. Ici, puisque nous allons traiter les mots caractère par caractère il est important de traiter des vrais "Chaîne", auquel cas nous traiterions atomes par atomes, ce que nous ne souhaitons pas. Donc, cette base de connaissance pourrait ce lire :\\
+	Vous vous demandez peut être ce que représente la liste en premier argument. En vérité, j'ai légèrement ( mais vraiment légèrement, et puis c'était pour votre bien d'abord ) menti qu'en je vous est présenté {\em 'slt bjr'.} comme étant une chaine. En vérité, en Prolog, toute chaîne écrite entre apostrophe est un atome. Une chaîne est en réalité une liste de nombre représentant le caractère en UTF-8 \& ASCII 7bits en base 10. Ici, puisque nous allons traiter les mots caractère par caractère il est important de traiter des vrais "Chaîne", auquel cas nous traiterions atomes par atomes, ce que nous ne souhaitons pas. Donc, cette base de connaissance pourrait ce lire :\\
 	
 	\indent phon('ch','\textipa{k}').\\
 	\indent phon('r','\textipa{K}').\\
@@ -327,14 +328,181 @@ Cette partie va ce concentrer sur l'implémentation des idées proposés dans le
 	Voila, nous avons une traduction phonétique fonctionnelle. Elle n'est pas parfaite, loin de la, aussi nous allons voir comment tirer profit du meilleur des deux traduction dans la prochaine partie.
 	
 	\section{But, will it blend ?}
-
+	
+	L'objectif est donc d'utiliser les deux types de traductions afin d'obtenir la meilleur traduction possible. Pour faire cela, il nous faut tout d'abord déterminer l'ordre des traductions. Nous avons décidé de priorisé la traduction par dictionnaire car celle-ci assure une traduction plus sur. De plus, la traduction par phonétique est parfaite pour déterminer des mots que l'on ne connaît pas, aussi cette ordre semble le plus efficace.\\
+	Ceci décidé, créer une règle utilisant les deux traductions est extrêmement simple :
+	\begin{lstlisting}[language=Prolog]
+	traduireMot(Sms, Fr) :- dico(Sms, Fr).
+	traduireMot(Sms, Fr) :- traduirePhoneme(Sms, Fr).
+	traduireMot(Sms, Sms).
+	\end{lstlisting}
+	
+	Cette règle va donc essayer de traduire un mot via la traduction par dictionnaire, puis, si elle échoue, elle va essayer de le traduire avec la phonétique et enfin, si les deux traductions échouent, alors on ne traduit simplement pas le mot. A la manière du fait {\em dico(X,X).} cela assure que la traduction est tout de même effectuer. À noter d'ailleurs que si l'on souhaite que {\em traduireMot/2} fonctionne, il faut supprimer {\em dico(X,X).} car sinon, {\em dico/2} sera toujours vrais ce qui faussera notre traduction.\\
+	
+	Ensuite, si nous désirons traduire simplement une "phrase" représenté par une liste d'atomes, il nous suffit de reprendre la règle {\em smsVersFr/2} et de la modifier pour utiliser la règle {\em traduireMot/2} :
+	\begin{lstlisting}[language=Prolog]
+	traduireMotaMot([],[]).
+		traduireMotaMot([Tete|Queue], [Tres|Qres]) :-
+		traduireMot(Tete,Tres), traduireMotaMot(Queue,Qres).
+	\end{lstlisting}
+	
+	{\em Note : En utilisant traduireMot/2 ainsi, on essaye de respecter l'ordre des traductions, toutefois, du au fonctionnement de Prolog, il va essayer de générer toute les combinaisons possibles, autrement dit, il peut essayer de traduire une phrase entièrement grâce à la phonétique quand bien même dico/2 pourrait être vrais. Toutefois, les premières traductions respecterons l'ordre. Aussi, bien qu'il existe des méthodes pour éviter ce comportement ( notamment grâce à cut/1 ) nous avons décidé de le garder pour générer plus de traduction possible.}\\
+	
+	Sont utilisation est relativement simple et efficace :
+	\begin{lstlisting}[language=Prolog]
+	?- traduireMotaMot([slt, komen, va, ton, sha, ?],E).
+		E = [salut, comment, vas, ton, chat, ?] ;
+		E = [salut, comment, vas, ton, chas, ?] ;
+		E = [salut, comment, vas, ton, chas, ?] ;
+		E = [salut, comment, vas, ton, chah, ?] ;
+		E = [salut, comment, vas, ton, schah, ?] ;
+		E = [salut, comment, vas, ton, 'Chat', ?] ;
+		E = [salut, comment, vas, ton, 'Chat', ?] ;
+		E = [salut, comment, vas, ton, chats, ?] .
+	\end{lstlisting}
+	
+	Pour encore plus de simplicité d'utilisation, on peut réutiliser la règle {\em chaineVersAtom/2} écrite plus tôt afin de prendre une pseudo-chaine plutôt qu'un tableau :
+	\begin{lstlisting}[language=Prolog]
+	traduire(Sms, Fr) :-
+		chaineVersAtom(Sms, Trad),
+		traduireMotaMot(Trad, Fr).
+	\end{lstlisting}
+	
+	Ce qui nous donne :
+	\begin{lstlisting}[language=Prolog]
+	?- traduire('slt komen va ton sha ?',E).
+		E = [salut, comment, vas, ton, chat, ?] .
+	\end{lstlisting}
+	
+	Voila, nous avons une traduction fidèle et simple à utiliser. Nous pourrions nous arrêter la, toutefois, il nous reste quelques éléments à finaliser. 
+	
+	\section{Finissions}
+	La première chose est, que ce passe t'il si l'utilisateur rentre des mots contenants des majuscules ?\\
+	Nous avons vu que {\em "komen"} était correctement traduis. Voici ce qu'il ce passe si l'on essaye de traduire {\em "\textbf{K}omen"} :
+	\begin{lstlisting}[language=Prolog]
+	?- traduireMot('Komen', B).
+		B = 'Komen'.
+	\end{lstlisting}
+	
+	Nous aurions le même résultat si nous utilisions le dictionnaire avec {\em "s\textbf{L}t"}. Ceci vient du fait que pour Prolog, l'atomes {\em "a"} et {\em " 'A' "} ne sont pas les mêmes :
+	\begin{lstlisting}[language=Prolog]
+	?- a = 'A'.
+	
+	false.
+	\end{lstlisting}
+	
+	{\em Note : Nous mettons "A" entre apostrophe car sinon, il serait considéré comme étant une variables et non pas un atomes.}\\
+	
+	Pour éviter ce genre de problème, nous pouvons simplement utiliser la règle de SWI-Prolog {\em downcase\_atom/2} qui va renvoyer la version en minuscule d'un atome :
+	\begin{lstlisting}[language=Prolog]
+	lowcase([],[]).
+	lowcase([T1|R],[H|Q]) :- downcase_atom(T1,H), lowcase(R,Q).
+	\end{lstlisting}
+	
+	Ce qui nous donne :
+	\begin{lstlisting}[language=Prolog]
+	?- lowcase(['Komen', 'sLt'], B), traduireMotaMot(B, X).
+		B = [komen, slt],
+		X = [comment, salut] .
+	\end{lstlisting}
+	
+	C'est déjà une première chose de réglé. maintenant, que ce passe t'on si on utilise de la ponctuation ? Et bien essayons :
+	\begin{lstlisting}[language=Prolog]
+	?- traduire('bjr, komen',B).
+		B = ['bjr,', comment] .
+	\end{lstlisting}
+	
+	Il ne fait pas de distinction entre les caractères "normaux" et la ponctuation, et donc créer l'atome {\em "bjr\textbf{,}"} au lieux de {\em "bjr"} ce qui fait échoué la traduction.\\
+	Pour traiter cela nous avons fait une petite règle simple : Le principe est de remplacer tout les caractère {\em "',;:.,?!} par leurs équivalent encadré de 2 espaces ( de manière à ce que {\em "bjr,"} soit traité mais aussi {\em ",bjr"} ). Par exemple {\em "komen."} va devenir {\em "komen<espace>.<espace>"}.\\
+	Pour cela on créer un fait qui associe chaque caractère de ponctuation par sont équivalent encadré d'espace :
+	\begin{lstlisting}[language=Prolog]
+	ponc(44, [32,44,32]).
+	ponc(46, [32,46,32]).
+	ponc(63, [32,63,32]).
+	ponc(33, [32,33,32]).
+	ponc(58, [32,58,32]).
+	ponc(59, [32,59,32]).
+	ponc(E,E).
+	\end{lstlisting}
+	
+	Puis on parcours un mot et on applique le fait sur les caractères parcourue :
+	\begin{lstlisting}[language=Prolog]
+	cleanup([],[]).
+	cleanup([T|R], [H|Q]) :- ponc(T,H), cleanup(R,Q).
+	\end{lstlisting}
+	
+	Finalement, on fait une règle qui va convertir un atome et renvoyer la chaine traiter :
+	\begin{lstlisting}[language=Prolog]
+	traiterPonctuation(Chaine, ChaineTraiter) :-
+		name(Chaine, Liste), cleanup(Liste, ListeTraiter),
+		flatten(ListeTraiter, Final), name(ChaineTraiter, Final).
+	\end{lstlisting}
+	
+	Et on l'intègre à notre règle {\em chaineVersAtom/2} :
+	\begin{lstlisting}[language=Prolog]
+	chaineVersAtom(Chaine, ListeAtom) :-
+		traiterPonctuation(Chaine, ChainePonc),
+		atomic_list_concat(Atoms, ' ', ChainePonc),
+		lowcase(Atoms, ListeAtom).
+	\end{lstlisting}
+	
+	Et voila ! Notre traduction marche désormais quelque soit la ponctuation et la casse utilisé :
+	\begin{lstlisting}[language=Prolog]
+	?- traduire('Komen, va Ton sHa?',E).
+	E = [comment, ',', '', vas, ton, chat, ?, ''] .
+	\end{lstlisting}
+	
+	Comme finissions, nous pouvons même créer une règle un peu plus user-friendly en utilisant la règle {\em read/1} et {\em write/1} de SWI-Prolog :
+	\begin{lstlisting}[language=Prolog]
+	reduireFosse :-
+		write('Veuillez ecrire la chaine a traduire :'),nl,
+		read(X), traduire(X,Fr), write(Fr).
+	\end{lstlisting}
+	
+	Ce qui nous donne :
+	\begin{lstlisting}[language=Prolog]
+	?- reduireFosse.
+	Veuillez ecrire la chaine a traduire :
+	|: 'komen va ton sha ?'.
+	comment vas ton chat  ?  
+	true ;
+	comment vas ton chas  ?  
+	true ;
+	comment vas ton chas  ?  
+	true .
+	\end{lstlisting}
+	
+	Notre programme final ressemble donc a ceci :\\
+	\begin{figure}[htp]
+	\centering
+	\includegraphics[scale=0.60]{mainpl.png}
+	\end{figure}
+ 
 \chapter{Conclusion}
 	\section{A vous de jouer}
+	Bien, vous savez désormais comment fonctionne la traduction, mais vous aimeriez surtout traduire le message mystérieux envoyer par votre neveux. Pour cela, il faut faut télécharger SWI-Prolog\footnote{http://www.swi-prolog.org/download/stable} puis ouvrir la console SWI-Prolog ( {\em swipl} sous GNU/Linux ) et consulter le fichier de projet. Pour cela écrivez juste {\em [/chemin/vers/le/fichier/main].} ( à noter qu'il ne faut pas rajouter l'extension de fichier {\em .pl} dans le chemin ). Le fichier main.pl s'occupera de charger tout les autres fichiers nécessaire. Une fois ceci fait, vous pouvez utiliser les règles {\em reduireFosse/0} et {\em traduire/2} comme vu précédemment.\\
+	Voila ! A vous de jouer !
 	
 	\section{Les insectes attaques !}
+	Aucun problème n'est parfait, le notre n’échappe pas non plus à quelque bug. Si l'utilisation de Prolog qui esy un langage haut niveau permet de ce soustraire des bugs techniques, il réside certain défaut :\\
+	La traduction par phonétique est très dépendante de son dictionnaire, hors, du à l'irrégularité de la syntaxe Wikipedia, le fichier de dictionnaire à été grossièrement parsé et possède de nombreux bug ( par exemple, à un moment, {\em "sha"} était traduit {\em "phytotoxique"} car une erreur de parsage avait donnée à ce dernier la phonétique "\textipa{\:la}" ).\\
+	De plus, notre algorithme de traduction vers la phonétique est souvent erroné du au fait que les phonèmes du français ne sont pas toujours exactement utiliser dans le SMS ce qui résulte en des erreurs de traduction.\\
+	La traduction est donc encore loin d'être parfaite et nécessiterais encore des améliorations. 
 	
 	\section{Voyons plus grand ! Voyons plus loin !}
+	Et bien, puisque nous parlions d'amélioration, voyons un peu celle que, si nous avion eu plus de temps, nous aurions pu apporter.\\
+	Tout d'abord, pour améliorer la traduction, nous aurions pu utiliser un {\em modèle de langue}. C'est une méthode statistique qui permet de déterminer les régularités d'un langage. En d'autre terme, nous aurions pu déterminer la probabilité de la traduction d'un mot en fonction des mots qui l'entoure.\\
+	Une autre amélioration qui n'est pas rapport à la traduction est celle de créer une GUI. SWI-Prolog permet d'embarquer son interpréteur dans de nombreux langage, dont Java. Nous aurions donc pu très bien imaginer créer une application Android\footnote{https://fr.wikipedia.org/wiki/Android} qui aurais permis à l'utilisateur de traduire simplement les SMS qu'il reçoit.
 	
 	\section{Credit ( Non ce n'est pas de l'argent )}
+	Avant de finir ce rapport, nous tenons à remercier plusieurs organisations et personnes pour l'aide, directe ou indirecte, qu'ils nous on apporté :
+	\begin{itemize}
+		\item Monsieur Nicolas Hernandez, notre professeur encadrant pour l'aide et les conseils qu'il nous à apporté.
+		\item La fondation Wikimedia sans qui nous n'aurions pu obtenir simplement la liste des phonèmes Français et un dictionnaire phonétique. A ce titre, et au tire de la licence GFDL, tout crédit leurs reviens pour les fichiers phonemes.pl et pron.pl.
+		\item Alain Colmerauer, Philippe Roussel et toute autre personne ayant participer à la conception de Prolog, sans quoi ce projet n'aurais jamais exister.
+		\item Jan Wielemaker et tout les contributeur à SWI-Prolog pour avoir créer un interpréteur Prolog sous licence libre extrêmement puissant.
+		\item  Patrick Blackburn, Johan Bos, et Kristina Striegnitz pour leurs cours sur Prolog {\em "Learn Prolog Now !}\footnote{http://www.learnprolognow.org/} qui nous aura aidé durant notre apprentissage de Prolog.
+		\item Et finalement, Emmanuel Adam pour ses cours et exercices Prolog.
+	\end{itemize}
 
 \end{document}
