@@ -6,3 +6,4 @@ dico('bjr','bonjour').
 dico('slt','salut').
 dico('cb','combien').
 dico('mdr','mort de rire').
+dico('cc','coucou').
