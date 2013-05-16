@@ -1,3 +1,10 @@
+/**
+	@descr Main file of the AI.
+	@author Maël Naccache
+	@date 2013
+*/
+
+
 % Initialisation.
 :- 
 	write('Bienvenue dans le traducteur Français -> Sms.'),nl,
@@ -7,9 +14,12 @@
 	write('Le programme est prêt à traduire.'),nl,
 	write('Utilisez la règles traduire/2 afin d\'obtenir toute les traductions possibles'),nl.
 	
-% Cette fonction transforme une chaine en liste d'atom qui vont être nos "mots".
-% Nous choisissons de les découper à chaque espace du à l'Axiome n°1.
-% Il nous reste à réaliser la suppressions des ponctiations.
+% Cette fonction transforme une chaine en liste d'atom qui vont être nos "mots". Nous choisissons de les découper à chaque espace du à l'Axiome n°1. Il nous reste à réaliser la suppressions des ponctuation.
+/**
+	@form chaineVersAtom(Chaine, ListeDatom).
+	@descr Ce predicat sert à transformer un atome ( Chaine ) vers une liste d'atome avec ponctuation traité.
+	@use lol
+*/
 chaineVersAtom(Chaine, ListeAtom) :-
 	traiterPonctuation(Chaine, ChainePonc),
 	atomic_list_concat(Atoms, ' ', ChainePonc),

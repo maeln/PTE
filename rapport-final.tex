@@ -1,4 +1,4 @@
-\documentclass[11pt]{book}
+\documentclass[11pt]{report}
 
 \usepackage[french]{babel}
 \usepackage[utf8]{inputenc}
@@ -10,18 +10,35 @@
 
 \usepackage{listings}
 
-\title{\textbf{Rapport Finale De Projet Technologique}}
-\author{Benjamin Fraquet\\
+\title{\includegraphics[scale=1]{logo.jpg}\\ \textbf{Rapport Finale De Projet Technologique}\\ Traduction de langage SMS\\ 1\up{ère} année}
+\author{Réalisé par :\\
+		Benjamin Fraquet\\
 		Francisco Ruivo\\
 		Maël Naccache\\
-		Merouane Bousbaa}
-\date{}
+		Merouane Bousbaa\\\\
+		Encadré par :\\
+		Nicolas Hernandez}
+		
+\date{15/05/2013}
+
 \usepackage{graphicx}
 \begin{document}
 
 \maketitle
 
 \tableofcontents
+
+\newpage
+
+\begin{center}
+\textbf{Résumé}
+\newline
+Ce projet consiste à transcire du langage "SMS" vers une phrase française compréhensible.
+Ceci à été réalisé au moyen du language Prolog et de deux approches de traductions : Par dictionnaire et à l'aide de la phonétique.
+Le rapport est divisé en deux grandes partie : Le chapitre 2 qui s'interesse à l'approche théorique du problème et le chapitre 3 qui explique la réalisation technique.
+Le premier chapitre introduira rapidement le Prolog et le language SMS et la dernière partie expliquera l'utilisation du programme ainsi que les améliorations à apporter.
+Sur ce, Bonne lecture.
+\end{center}
 
 \newpage
 
@@ -476,6 +493,7 @@ Cette partie va ce concentrer sur l'implémentation des idées proposés dans le
 	\begin{figure}[htp]
 	\centering
 	\includegraphics[scale=0.60]{mainpl.png}
+	\caption{Graphique du programme. Les boites vertes représentes les règles et les faits, les flèches les appelles fait.}
 	\end{figure}
  
 \chapter{Conclusion}
@@ -494,7 +512,7 @@ Cette partie va ce concentrer sur l'implémentation des idées proposés dans le
 	Tout d'abord, pour améliorer la traduction, nous aurions pu utiliser un {\em modèle de langue}. C'est une méthode statistique qui permet de déterminer les régularités d'un langage. En d'autre terme, nous aurions pu déterminer la probabilité de la traduction d'un mot en fonction des mots qui l'entoure.\\
 	Une autre amélioration qui n'est pas rapport à la traduction est celle de créer une GUI. SWI-Prolog permet d'embarquer son interpréteur dans de nombreux langage, dont Java. Nous aurions donc pu très bien imaginer créer une application Android\footnote{https://fr.wikipedia.org/wiki/Android} qui aurais permis à l'utilisateur de traduire simplement les SMS qu'il reçoit.
 	
-	\section{Credit ( Non ce n'est pas de l'argent )}
+	\section{Credit}
 	Avant de finir ce rapport, nous tenons à remercier plusieurs organisations et personnes pour l'aide, directe ou indirecte, qu'ils nous on apporté :
 	\begin{itemize}
 		\item Monsieur Nicolas Hernandez, notre professeur encadrant pour l'aide et les conseils qu'il nous à apporté.
@@ -504,5 +522,16 @@ Cette partie va ce concentrer sur l'implémentation des idées proposés dans le
 		\item  Patrick Blackburn, Johan Bos, et Kristina Striegnitz pour leurs cours sur Prolog {\em "Learn Prolog Now !}\footnote{http://www.learnprolognow.org/} qui nous aura aidé durant notre apprentissage de Prolog.
 		\item Et finalement, Emmanuel Adam pour ses cours et exercices Prolog.
 	\end{itemize}
-
+	
+	\newpage
+	
+	\begin{center}
+		\Huge Rapport de Projet Technologique\\
+		\bigskip 
+		\bigskip 
+		\bigskip 
+		\bigskip 
+		\LARGE Université de Nantes\\ Institut Universitaire de Technologie\\ Département Informatique
+	\end{center}
+	
 \end{document}
