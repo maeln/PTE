@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Pte by maeln</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Pte</h1>
+        <p>A small AI that translate SMS to French coded in Prolog.</p>
+
+        <p class="view"><a href="https://github.com/maeln/PTE">View the Project on GitHub <small>maeln/PTE</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/maeln/PTE/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/maeln/PTE/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/maeln/PTE">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>Projet Technique De Première Année</h1>
+
+<h2>Traduction du langage SMS vers le Français.</h2>
+
+<blockquote>
+<p>Maël Naccache, Francisco Ruivo, Benjamin Fraquet, Merouane Bousbaa. |
+IUT de Nantes, Département Informatique, 1ère Année. |
+2012 - 2013</p>
+</blockquote>
+
+<p>Ce projet, réalisé dans le cadre des projets de première année pour l'IUT de Nantes,
+consistais à réaliser une intelligence artificiel, en Prolog, capable de produire une phrase
+française correcte à partir d'une phrase écrite en "SMS".</p>
+
+<h2>Utilisation</h2>
+
+<p>Pour utiliser le traducteur, démarrer votre interpréteur Prolog et consulté le fichier main.pl.
+Ensuite, utilisé la règle traduire/2 pour traduire votre phrase. Celle-ci produira toute les phrases française possible.</p>
+
+<h1>Exemple :</h1>
+
+<pre><code>?- traduire('bjr komen tu va ?', E).
+
+E = [bonjour, comment, tu, va, ?] ;
+E = [bonjour, comment, tu, vas, ?] .
+</code></pre>
+
+<h1>Attention :</h1>
+
+<p>L'implémentation Prolog utilisé par ce projet est <a href="http://www.swi-prolog.org/">SWI-Prolog</a>, il n'y à aucune garanti qu'il fonctionnera sur
+d'autre implémentation.</p>
+
+<h1>Crédit :</h1>
+
+<p>Le dictionnaire phonétique français disponible dans le fichier pron.pl est adapté d'un dump du <a href="https://www.wiktionary.org/">Wiktionary</a>.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/maeln">maeln</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
