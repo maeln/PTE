@@ -3,13 +3,13 @@ HOW TO USE
 
 ## Interpréteur Prolog
 
-Ce programme à été développé avec SWI-Prolog 6.2.6. Afin de l’exécuter il vous faut télécharger [SWI-Prolog](http://www.swi-prolog.org/download/stable).
+Ce programme a été développé avec SWI-Prolog 6.2.6. Afin de l’exécuter il vous faut télécharger [SWI-Prolog](http://www.swi-prolog.org/download/stable).
 
 Une fois ceci fait, il vous faut ouvrir l’interpréteur dans le dossier du projet.
 
 ## Télécharger le programme
 
-Sous GNU/Linux faite les commandes suivantes :
+Sous GNU/Linux faites les commandes suivantes :
 
 	$ wget https://github.com/maeln/PTE/archive/master.zip -O sms.zip
 	$ unzip sms.zip & cd PTE-master
@@ -27,7 +27,7 @@ ou
 	
 	?- consult(main).
 	
-L’interpréteur devrais charger tout les fichiers nécessaire ( Attention, le dictionnaire phonétique peut prendre quelque minutes à ce charger ).
+L’interpréteur devrait charger tous les fichiers nécessaires ( Attention, le dictionnaire phonétique peut prendre quelques minutes à se charger ).
 
 Pour traduire, vous pouvez au choix utiliser les règles *traduire/2* ou *reduireFosse/0*
 
