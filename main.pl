@@ -108,3 +108,17 @@ display([T|Q]) :- write(T), write(' '), display(Q).
 reduireFosse :-
 	write('Veuillez écrire la chaine à traduire :'),nl,
 	read(X), traduire(X,Fr), display(Fr).
+	
+% Demo Dico pour soutenance.
+demoDico :-
+	write('Veuillez écrire la chaine à traduire :'),nl,
+	read(X), chaineVersAtom(X,E), smsVersFr(E,Fr), display(Fr).
+
+% Demo Phonème pour soutenance.
+phonTrad([],[]).
+phonTrad([T|Q],[H|R]) :-
+	traduirePhoneme(T, H), phonTrad(Q,R).
+
+demoPhon :-
+	write('Veuillez écrire la chaine à traduire :'),nl,
+	read(X), chaineVersAtom(X,E), phonTrad(E,Fr), display(Fr).
