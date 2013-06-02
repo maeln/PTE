@@ -1,0 +1,20 @@
+Bijour,
+Je vais donc vous présentez la traduction par approche phonétique que nous avons conçu.
+Tout d'abord, quelque élèments de vocabulaire : <lire slides>
+Pourquoi cette approche ?
+Cette approche nous a permis de règler le problème des mots polymorphe dont la prononciation n'était pas changer <exemple>, ainsi, plus besoin d'avoir de multiple entrée dans le dictionnaire pour un même mot, mais différente écriture.
+// Donc, comme on peut le voir, le SMS ne change pas forcément la phonétique, et peut prendre plusieurs formes <exemple>,
+nous traduisons donc le SMS vers de l'API grâce au phonême français ( on considère que le SMS et le français partage globalement les même phonémes )
+Nous avons ensuite une base de connaissance avec la phonétique des mots français et on cherche une occurence de notre traduction
+Grâce à ceci, on peut traduire des mot que nous ne connaissons pas ( dans le dictionnaire ) et gèrer les mots polymorphes
+L'implémentation prolog est relativement simple : Une règle qui prend 1 à 3 caractère ( car le plus grand phonéme en français est de 3 caractère ) et on leurs applique 
+au fur et à mesure les phonémes. D'ou la nécessité d'une base de connaissance des phonémes français, puis on recherche la traduction phonétique dans une base de connaissance
+phonétique vers français.
+Ainsi on fait du SMS vers le phonétique et du phonétique vers le français, on peut ainsi trouver des traductions.
+< Faire un petit exemple a l'ordi >
+
+Notre programme finale utilise les 2 traductions, tout d'abord celle par dictionnaire, car elle assure une traduction fidèle,
+puis par phonétique pour traduire les mots polymorphes et les mots inconnue.
+Si un mot ne peut être traduit, on le laisse tel qu'elle.
+
+
